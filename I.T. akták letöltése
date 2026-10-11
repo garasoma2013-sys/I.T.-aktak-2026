@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I.T. Solutions & I.T. Akták Portál</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --panel-bg: rgba(18, 24, 38, 0.75);
+      --panel-border: rgba(56, 189, 248, 0.15);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.35);
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-logo-watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(3rem, 12vw, 10rem);
+      font-weight: 800;
+      color: rgba(56, 189, 248, 0.03);
+      text-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 1;
+      letter-spacing: 12px;
+      display: none;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    .app-container.fullscreen-mode {
+      max-width: 1200px;
+      width: 95vw;
+      height: 90vh;
+    }
+
+    .card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fullscreen-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff 30%, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+      color: #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+    }
+
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(10, 15, 26, 0.6);
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert {
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .alert-info {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: #7dd3fc;
+    }
+
+    .alert-success {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fde047;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 100;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+      height: calc(100% - 70px);
+    }
+
+    .sidebar {
+      background: rgba(10, 15, 26, 0.4);
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-btn {
+      padding: 12px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-btn:hover, .sidebar-btn.active {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary);
+    }
+
+    .main-content {
+      background: rgba(10, 15, 26, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .vote-badges {
+      display: flex;
+      gap: 6px;
+      margin: 10px 0;
+    }
+
+    .vote-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+    }
+
+    .vote-badge.voted-yes {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .vote-badge.voted-no {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .folder-card {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      border-radius: 12px;
+      padding: 15px;
+      position: relative;
+    }
+
+    .folder-card.locked {
+      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.15);
+    }
+
+    /* CHAT BOX STYLES */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 5px;
+      margin-bottom: 15px;
+    }
+
+    .chat-msg {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 14px;
+      max-width: 80%;
+    }
+
+    .chat-msg.mine {
+      align-self: flex-end;
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .chat-sender {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 3px;
+    }
+
+    .chat-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 8px;
+      font-weight: normal;
+    }
+
+    .chat-text {
+      font-size: 13px;
+      color: var(--text-main);
+      word-break: break-word;
+      user-select: text;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particle-canvas"></canvas>
+  <div id="watermark" class="bg-logo-watermark">I.T. SOLUTIONS</div>
+
+  <div id="app-wrapper" class="app-container">
+    <div class="card" id="main-card">
+
+      <!-- 1. FŐMENÜ -->
+      <div id="view-menu" class="view active">
+        <h1 class="brand-title">I.T. Solutions</h1>
+        <p class="subtitle">Biztonságos Rendszerportál</p>
+
+        <div id="notification-area"></div>
+
+        <button class="btn" onclick="showView('view-login')">🔐 Belépés I.T. Aktákba</button>
+        <button class="btn btn-secondary" onclick="showView('view-report')">📩 Valamit jelenteni szeretnék</button>
+        <button class="btn btn-secondary" id="btn-apply-main" onclick="showView('view-apply')">📝 Csatlakozás a programhoz</button>
+      </div>
+
+      <!-- 2. BELÉPÉS -->
+      <div id="view-login" class="view">
+        <h2 class="brand-title">I.T. Akták - Belépés</h2>
+        <p class="subtitle">Add meg az azonosítódat és a jelszavadat</p>
+
+        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+          <div class="input-group">
+            <label>Felhasználónév</label>
+            <input type="text" id="login-user" placeholder="@soma, @lőrinc, @máté vagy saját @" required>
+          </div>
+          
+          <div class="input-group">
+            <label>Jelszó</label>
+            <input type="password" id="login-pass" placeholder="A megadott jelszavad" required>
+          </div>
+
+          <button type="submit" class="btn">Bejelentkezés</button>
+          <button type="button" class="btn btn-secondary" onclick="showView('view-menu')">Vissza a főmenübe</button>
+        </form>
+      </div>
+
+      <!-- 3. JELENTÉS BEKÜLDÉSE -->
+      <div id="view-report" class="view">
+        <h2 class="brand-title">Jelentés Beküldése</h2>
+        <p class="subtitle">Küldj jelentést az I.T. Solutions vezetőségének</p>
+
+        <form id="report-form" onsubmit="handleReportSubmit(event)">
+          <div class="input-group">
+            <label>Neved vagy azonosítód</label>
+            <input type="text" id="report-sender" placeholder="Pl. Kovács Péter vagy @péter" required>
+          </div>
+
+          <div class="input-group">
+            <label>Jelentés leírása</label>
+            <textarea id="report-content" placeholder="Írd le részletesen a jelenteni kívánt eseményt..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn">Jelentés Elküldése</button>
+          <button type="button" class="btn btn-secondary" onclick="showView('view-menu')">Vissza</button>
+        </form>
+      </div>
+
+      <!-- 4. CSATLAKOZÁSI KÉRELEM -->
+      <div id="view-apply" class="view">
+        <h2 class="brand-title">Csatlakozási Kérelem</h2>
+        <p class="subtitle">Nyújtsd be a csatlakozási kérelmedet</p>
+
+        <form id="apply-form" onsubmit="handleApplySubmit(event)">
+          <div class="input-group">
+            <label>Kívánt felhasználónév (@ név)</label>
+            <input type="text" id="apply-username" placeholder="Pl. @péter" required>
+          </div>
+
+          <div class="input-group">
+            <label>Miért szeretnél csatlakozni?</label>
+            <textarea id="apply-reason" placeholder="Írd le az indokodat..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn">Kérelem Beküldése</button>
+          <button type="button" class="btn btn-secondary" onclick="showView('view-menu')">Vissza</button>
+        </form>
+      </div>
+
+      <!-- 5. TELJES KÉPERNYŐS DASHBOARD (I.T. AKTÁK) -->
+      <div id="view-dashboard" class="view">
+        <div class="dashboard-header">
+          <div>
+            <h2 style="font-size: 20px; color: var(--primary);">📂 I.T. AKTÁK PORTÁL</h2>
+            <p id="user-display" style="font-size: 13px; color: var(--text-muted);"></p>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="logout()" style="width: auto;">Kijelentkezés</button>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Sidebar -->
+          <div class="sidebar">
+            <button class="sidebar-btn active" id="tab-btn-chat" onclick="switchAdminTab('chat')">💬 Belső Chat</button>
+            <button class="sidebar-btn" id="tab-btn-docs" onclick="switchAdminTab('docs')">📁 Dokumentumok</button>
+            <button class="sidebar-btn" id="tab-btn-apps" onclick="switchAdminTab('apps')">📝 Csatlakozások (3/3)</button>
+            <button class="sidebar-btn" id="tab-btn-reports" onclick="switchAdminTab('reports')">📩 Jelentések</button>
+            <button class="sidebar-btn" id="tab-btn-folders" onclick="switchAdminTab('folders')">📂 Mappakezelő (3/3)</button>
+          </div>
+
+          <!-- Main Dashboard Area -->
+          <div class="main-content">
+            <!-- TAB: Belső Chat -->
+            <div id="admin-tab-chat" class="admin-tab-content chat-container" style="display:flex;">
+              <h3 style="margin-bottom: 5px;">Belső Rendszerchat</h3>
+              <p style="color: var(--text-muted); font-size:13px; margin-bottom:15px;">Élő üzenetváltás a tagok és adminok között.</p>
+              
+              <div id="chat-messages" class="chat-messages"></div>
+
+              <form onsubmit="sendChatMessage(event)" class="chat-input-area">
+                <input type="text" id="chat-input-text" placeholder="Írj egy üzenetet..." autocomplete="off" required>
+                <button type="submit" class="btn btn-sm" style="width:auto; padding:0 20px;">Küldés</button>
+              </form>
+            </div>
+
+            <!-- TAB: Dokumentumok -->
+            <div id="admin-tab-docs" class="admin-tab-content" style="display:none;">
+              <h3>Belső I.T. Akták</h3>
+              <p style="color: var(--text-muted); font-size:14px; margin-top:5px;">Bizalmas vállalati dokumentumok és jegyzőkönyvek.</p>
+              <div id="docs-container" style="margin-top: 20px;">
+                <p style="color:var(--text-muted); font-size:14px;">Még nincsenek feltöltött dokumentumok.</p>
+              </div>
+            </div>
+
+            <!-- TAB: Csatlakozási kérelmek -->
+            <div id="admin-tab-apps" class="admin-tab-content" style="display:none;">
+              <h3>Csatlakozási Kérelmek Elbírálása</h3>
+              <p style="color: var(--text-muted); font-size:13px; margin-bottom:15px;">Minden kérelemhez mindhárom adminisztrátor jóváhagyása szükséges.</p>
+              <div id="apps-container"></div>
+            </div>
+
+            <!-- TAB: Jelentések -->
+            <div id="admin-tab-reports" class="admin-tab-content" style="display:none;">
+              <h3>Beküldött Jelentések</h3>
+              <p style="color: var(--text-muted); font-size:13px; margin-bottom:15px;">Itt tudod törölni a jelentéseket vagy tetszőleges mappába (aktába) rakni őket.</p>
+              <div id="reports-container"></div>
+            </div>
+
+            <!-- TAB: Mappakezelő -->
+            <div id="admin-tab-folders" class="admin-tab-content" style="display:none;">
+              <h3>Mappák & Zárolási Rendszer</h3>
+              <p style="color: var(--text-muted); font-size:13px; margin-bottom:15px;">Új mappát bárki létrehozhat. Törléshez vagy zároláshoz 3/3 admin szavazat kell.</p>
+
+              <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input type="text" id="new-folder-name" placeholder="Új mappa (akta) neve...">
+                <button class="btn btn-sm" onclick="createFolder()" style="width: auto; white-space: nowrap;">+ Mappa Létrehozása</button>
+              </div>
+
+              <div id="folders-container" class="folder-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Üzenet</div>
+
+  <script>
+    // --- ADATBÁZIS & ÁLLAPOTOK ---
+    const ADMINS = ['@soma', '@lőrinc', '@máté'];
+
+    let users = JSON.parse(localStorage.getItem('it_v5_users')) || {
+      '@soma': { pass: 'jelel', role: 'admin' },
+      '@lőrinc': { pass: 'jelel', role: 'admin' },
+      '@máté': { pass: 'jelel', role: 'admin' }
+    };
+
+    let applications = JSON.parse(localStorage.getItem('it_v5_apps')) || [];
+    let reports = JSON.parse(localStorage.getItem('it_v5_reports')) || [];
+    let folders = JSON.parse(localStorage.getItem('it_v5_folders')) || [];
+    let chatMessages = JSON.parse(localStorage.getItem('it_v5_chat')) || [];
+
+    let currentUser = null;
+
+    function saveData() {
+      localStorage.setItem('it_v5_users', JSON.stringify(users));
+      localStorage.setItem('it_v5_apps', JSON.stringify(applications));
+      localStorage.setItem('it_v5_reports', JSON.stringify(reports));
+      localStorage.setItem('it_v5_folders', JSON.stringify(folders));
+      localStorage.setItem('it_v5_chat', JSON.stringify(chatMessages));
+    }
+
+    // --- UTILS & TOAST ---
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+
+      const wrapper = document.getElementById('app-wrapper');
+      const card = document.getElementById('main-card');
+      const watermark = document.getElementById('watermark');
+
+      if (viewId === 'view-dashboard') {
+        wrapper.classList.add('fullscreen-mode');
+        card.classList.add('fullscreen-card');
+        watermark.style.display = 'block';
+      } else {
+        wrapper.classList.remove('fullscreen-mode');
+        card.classList.remove('fullscreen-card');
+        watermark.style.display = 'none';
+      }
+
+      checkApplyButtonVisibility();
+      renderNotifications();
+    }
+
+    function checkApplyButtonVisibility() {
+      const myAppUsername = localStorage.getItem('my_applied_username');
+      const applyBtn = document.getElementById('btn-apply-main');
+
+      if (myAppUsername) {
+        applyBtn.style.display = 'none';
+      } else {
+        applyBtn.style.display = 'flex';
+      }
+    }
+
+    function renderNotifications() {
+      const notifDiv = document.getElementById('notification-area');
+      notifDiv.innerHTML = '';
+
+      const myAppUsername = localStorage.getItem('my_applied_username');
+      if (!myAppUsername) return;
+
+      const app = applications.find(a => a.username === myAppUsername);
+      if (!app) return;
+
+      if (app.status === 'accepted_pending_password') {
+        notifDiv.innerHTML = `
+          <div class="alert alert-success">
+            <b>🎉 A 3 adminisztrátor elfogadta a jelentkezésedet!</b><br>
+            Kérjük, add meg a használni kívánt jelszavadat a fiókod aktiválásához:
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <input type="password" id="user-set-pass" placeholder="Új jelszó megadása">
+              <button class="btn btn-sm btn-success" onclick="setUserPassword('${app.username}')">Mentés</button>
+            </div>
+          </div>
+        `;
+      } else if (app.status === 'rejected') {
+        const now = Date.now();
+        if (now < app.reapplyTime) {
+          const timeLeftHours = Math.ceil((app.reapplyTime - now) / (1000 * 60 * 60));
+          notifDiv.innerHTML = `
+            <div class="alert alert-warning">
+              <b>❌ Jelentkezési kérelem elutasítva.</b><br>
+              Újra próbálkozhatsz kb. <b>${timeLeftHours} óra</b> múlva.
+            </div>
+          `;
+        } else {
+          localStorage.removeItem('my_applied_username');
+          checkApplyButtonVisibility();
+        }
+      } else if (app.status === 'pending') {
+        notifDiv.innerHTML = `
+          <div class="alert alert-info">
+            <b>⏳ Csatlakozási kérelem folyamatban...</b><br>
+            A 3 adminisztrátor (@soma, @lőrinc, @máté) elbírálására vár.
+          </div>
+        `;
+      }
+    }
+
+    function setUserPassword(username) {
+      const passInput = document.getElementById('user-set-pass').value.trim();
+      if (!passInput) {
+        showToast('Kérjük, adj meg egy érvényes jelszót!');
+        return;
+      }
+
+      users[username] = { pass: passInput, role: 'member' };
+      
+      const app = applications.find(a => a.username === username);
+      if (app) app.status = 'completed';
+
+      saveData();
+      showToast('Jelszó sikeresen beállítva! Most már bejelentkezhetsz.');
+      renderNotifications();
+    }
+
+    // --- HANDLERS ---
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-user').value.trim().toLowerCase();
+      const p = document.getElementById('login-pass').value.trim();
+
+      if (users[u] && users[u].pass === p) {
+        currentUser = u;
+        document.getElementById('user-display').innerText = `Bejelentkezve mint: ${currentUser} (${users[u].role === 'admin' ? 'Vezető Admin' : 'Tag'})`;
+        
+        if (users[currentUser].role === 'admin') {
+          document.getElementById('tab-btn-apps').style.display = 'flex';
+          document.getElementById('tab-btn-folders').style.display = 'flex';
+        } else {
+          document.getElementById('tab-btn-apps').style.display = 'none';
+          document.getElementById('tab-btn-folders').style.display = 'none';
+        }
+
+        showView('view-dashboard');
+        switchAdminTab('chat');
+        showToast('Sikeres bejelentkezés!');
+      } else {
+        showToast('Hibás felhasználónév vagy jelszó!');
+      }
+    }
+
+    function handleReportSubmit(e) {
+      e.preventDefault();
+      const sender = document.getElementById('report-sender').value.trim();
+      const content = document.getElementById('report-content').value.trim();
+
+      reports.push({
+        id: Date.now(),
+        sender: sender,
+        content: content,
+        date: new Date().toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' }),
+        folderId: null
+      });
+
+      saveData();
+      document.getElementById('report-form').reset();
+      showToast('Jelentés sikeresen beküldve!');
+      showView('view-menu');
+    }
+
+    function handleApplySubmit(e) {
+      e.preventDefault();
+      let username = document.getElementById('apply-username').value.trim().toLowerCase();
+      const reason = document.getElementById('apply-reason').value.trim();
+
+      if (!username.startsWith('@')) username = '@' + username;
+
+      if (users[username]) {
+        showToast('Ez a felhasználónév már létezik!');
+        return;
+      }
+
+      applications.push({
+        id: Date.now(),
+        username: username,
+        reason: reason,
+        votesYes: [],
+        votesNo: [],
+        rejectDurationDays: 7,
+        status: 'pending'
+      });
+
+      localStorage.setItem('my_applied_username', username);
+      saveData();
+
+      document.getElementById('apply-form').reset();
+      showToast('Kérelem sikeresen elküldve!');
+      showView('view-menu');
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('login-form').reset();
+      showView('view-menu');
+      showToast('Kijelentkezve.');
+    }
+
+    // --- CHAT SYSTEM ---
+    function sendChatMessage(e) {
+      e.preventDefault();
+      const txtInput = document.getElementById('chat-input-text');
+      const text = txtInput.value.trim();
+
+      if (!text) return;
+
+      chatMessages.push({
+        id: Date.now(),
+        sender: currentUser,
+        text: text,
+        time: new Date().toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' })
+      });
+
+      saveData();
+      txtInput.value = '';
+      renderChat();
+    }
+
+    function renderChat() {
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML = '';
+
+      if (chatMessages.length === 0) {
+        chatBox.innerHTML = '<p style="color:var(--text-muted); font-size:13px; text-align:center; margin-top:20px;">Nincsenek még üzenetek. Írj te először!</p>';
+        return;
+      }
+
+      chatMessages.forEach(msg => {
+        const isMine = msg.sender === currentUser;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-msg ${isMine ? 'mine' : ''}`;
+        msgDiv.innerHTML = `
+          <div class="chat-sender">${msg.sender} <span class="chat-time">${msg.time}</span></div>
+          <div class="chat-text">${escapeHtml(msg.text)}</div>
+        `;
+        chatBox.appendChild(msgDiv);
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // --- ADMIN TABS & VOTING ---
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-tab-content').forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('chat-container');
+      });
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+
+      const targetTab = document.getElementById(`admin-tab-${tabName}`);
+      targetTab.style.display = 'block';
+      if (tabName === 'chat') {
+        targetTab.style.display = 'flex';
+        targetTab.classList.add('chat-container');
+      }
+
+      document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+
+      if (tabName === 'chat') renderChat();
+      if (tabName === 'apps') renderApps();
+      if (tabName === 'reports') renderReports();
+      if (tabName === 'folders') renderFolders();
+    }
+
+    // --- RENDER APPLICATIONS ---
+    function renderApps() {
+      const container = document.getElementById('apps-container');
+      container.innerHTML = '';
+
+      const pendingApps = applications.filter(a => a.status === 'pending');
+      if (pendingApps.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:14px;">Nincs elbírálásra váró kérelem.</p>';
+        return;
+      }
+
+      pendingApps.forEach(app => {
+        const item = document.createElement('div');
+        item.className = 'item-card';
+
+        const hasVotedYes = app.votesYes.includes(currentUser);
+        const hasVotedNo = app.votesNo.includes(currentUser);
+
+        item.innerHTML = `
+          <h4>${app.username}</h4>
+          <p style="font-size:13px; color:var(--text-muted); margin: 6px 0;">"${escapeHtml(app.reason)}"</p>
+          
+          <div class="vote-badges">
+            <span class="vote-badge ${app.votesYes.length > 0 ? 'voted-yes' : ''}">Jóváhagyta: ${app.votesYes.join(', ') || 'Senki'} (${app.votesYes.length}/3)</span>
+            <span class="vote-badge ${app.votesNo.length > 0 ? 'voted-no' : ''}">Elutasította: ${app.votesNo.join(', ') || 'Senki'} (${app.votesNo.length}/3)</span>
+          </div>
+
+          <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+            <label style="margin:0; font-size:12px;">Elutasítási időtartam:</label>
+            <select id="reject-time-${app.id}" style="width:auto; padding:4px 8px; font-size:12px;">
+              <option value="1">1 nap</option>
+              <option value="3">3 nap</option>
+              <option value="7" selected>1 hét</option>
+              <option value="14">2 hét</option>
+              <option value="30">1 hónap</option>
+            </select>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn btn-sm btn-success" onclick="voteApp(${app.id}, 'yes')" ${hasVotedYes ? 'disabled style="opacity:0.5"' : ''}>👍 Jóváhagyás</button>
+            <button class="btn btn-sm btn-danger" onclick="voteApp(${app.id}, 'no')" ${hasVotedNo ? 'disabled style="opacity:0.5"' : ''}>👎 Elutasítás</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function voteApp(appId, voteType) {
+      const app = applications.find(a => a.id === appId);
+      if (!app) return;
+
+      app.votesYes = app.votesYes.filter(u => u !== currentUser);
+      app.votesNo = app.votesNo.filter(u => u !== currentUser);
+
+      if (voteType === 'yes') {
+        app.votesYes.push(currentUser);
+      } else {
+        app.votesNo.push(currentUser);
+        const sel = document.getElementById(`reject-time-${appId}`);
+        if (sel) app.rejectDurationDays = parseInt(sel.value);
+      }
+
+      if (app.votesYes.length === 3) {
+        app.status = 'accepted_pending_password';
+        showToast(`Kérelem ELFOGADVA mindhárom admin által (${app.username})!`);
+      } else if (app.votesNo.length === 3) {
+        app.status = 'rejected';
+        app.reapplyTime = Date.now() + (app.rejectDurationDays * 24 * 60 * 60 * 1000);
+        showToast(`Kérelem ELUTASÍTVA (${app.rejectDurationDays} nap tiltás).`);
+      }
+
+      saveData();
+      renderApps();
+    }
+
+    // --- RENDER REPORTS (ÁTHELYEZÉS AKTA / TÖR LÉS) ---
+    function renderReports() {
+      const container = document.getElementById('reports-container');
+      container.innerHTML = '';
+
+      if (reports.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:14px;">Nincsenek jelentések.</p>';
+        return;
+      }
+
+      reports.forEach(rep => {
+        const item = document.createElement('div');
+        item.className = 'item-card';
+
+        let folderOptions = '<option value="">📁 Válassz aktát/mappát...</option>';
+        folders.forEach(f => {
+          folderOptions += `<option value="${f.id}" ${rep.folderId == f.id ? 'selected' : ''}>📂 ${escapeHtml(f.name)}</option>`;
+        });
+
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>${escapeHtml(rep.sender)}</b>
+            <span style="font-size:11px; color:var(--text-muted);">${rep.date}</span>
+          </div>
+          <p style="font-size:13px; color:#e2e8f0; margin:8px 0;">"${escapeHtml(rep.content)}"</p>
+
+          <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+            <select style="width:auto; font-size:12px; padding:6px 10px;" onchange="moveReport(${rep.id}, this.value)">
+              ${folderOptions}
+            </select>
+            <button class="btn btn-sm btn-danger" style="width:auto;" onclick="deleteReport(${rep.id})">🗑️ Jelentés Törlése</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function moveReport(reportId, folderId) {
+      const rep = reports.find(r => r.id === reportId);
+      if (rep) {
+        rep.folderId = folderId ? parseInt(folderId) : null;
+        saveData();
+        const folderName = folderId ? folders.find(f => f.id == folderId)?.name : 'Nincs mappa';
+        showToast(`Jelentés berakva az aktába: ${folderName}`);
+        renderReports();
+      }
+    }
+
+    function deleteReport(reportId) {
+      reports = reports.filter(r => r.id !== reportId);
+      saveData();
+      renderReports();
+      showToast('Jelentés sikeresen törölve!');
+    }
+
+    // --- FOLDERS & 3-ADMIN VOTING ---
+    function createFolder() {
+      const input = document.getElementById('new-folder-name');
+      const name = input.value.trim();
+
+      if (!name) {
+        showToast('Kérjük, adj meg egy mappanevet!');
+        return;
+      }
+
+      folders.push({
+        id: Date.now(),
+        name: name,
+        locked: false,
+        votesDelete: [],
+        votesLock: []
+      });
+
+      saveData();
+      input.value = '';
+      renderFolders();
+      showToast('Mappa (akta) létrehozva!');
+    }
+
+    function renderFolders() {
+      const container = document.getElementById('folders-container');
+      container.innerHTML = '';
+
+      if (folders.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:14px; grid-column: 1/-1;">Még nincsenek létrehozva mappák.</p>';
+        return;
+      }
+
+      folders.forEach(f => {
+        const item = document.createElement('div');
+        item.className = `folder-card ${f.locked ? 'locked' : ''}`;
+
+        const countReports = reports.filter(r => r.folderId === f.id).length;
+
+        item.innerHTML = `
+          <h4>${f.locked ? '🔒' : '📁'} ${escapeHtml(f.name)}</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">${countReports} jelentés ebben az aktában</p>
+
+          <div style="margin-top:10px; font-size:10px; color:var(--text-muted);">
+            <div>Törlés szavazat: ${f.votesDelete.length}/3</div>
+            <div>Zárolás szavazat: ${f.votesLock.length}/3</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+            <button class="btn btn-sm btn-secondary" onclick="voteFolder(${f.id}, 'lock')">${f.locked ? 'Feloldás Szavazás' : 'Zárolás Szavazás'}</button>
+            <button class="btn btn-sm btn-danger" onclick="voteFolder(${f.id}, 'delete')">Törlés Szavazás</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function voteFolder(folderId, action) {
+      const f = folders.find(fold => fold.id === folderId);
+      if (!f) return;
+
+      if (action === 'delete') {
+        if (!f.votesDelete.includes(currentUser)) f.votesDelete.push(currentUser);
+        if (f.votesDelete.length === 3) {
+          folders = folders.filter(fold => fold.id !== folderId);
+          showToast(`Mappa TÖRÖLVE (3/3 szavazat): ${f.name}`);
+        } else {
+          showToast(`Törlési szavazat rögzítve (${f.votesDelete.length}/3)`);
+        }
+      } else if (action === 'lock') {
+        if (!f.votesLock.includes(currentUser)) f.votesLock.push(currentUser);
+        if (f.votesLock.length === 3) {
+          f.locked = !f.locked;
+          f.votesLock = [];
+          showToast(`Mappa állapota módosítva: ${f.locked ? 'ZÁROLVA' : 'FELOLDVA'}`);
+        } else {
+          showToast(`Zárolási szavazat rögzítve (${f.votesLock.length}/3)`);
+        }
+      }
+
+      saveData();
+      renderFolders();
+    }
+
+    // --- BACKGROUND PARTICLE CANVAS ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const particles = Array.from({ length: 45 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      radius: Math.random() * 1.5 + 1
+    }));
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.fill();
+
+        for (let j = index + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.15 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Init
+    checkApplyButtonVisibility();
+    renderNotifications();
+  </script>
+</body>
+</html>
